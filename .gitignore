@@ -1,0 +1,15 @@
+# Google Antigravity IDE
+.antigravity/
+.agent/
+.agents/cache/
+
+# Environment and secrets
+.env
+.env.local
+
+# Dependencies
+node_modules/
+
+# OS files
+Thumbs.db
+.DS_Store

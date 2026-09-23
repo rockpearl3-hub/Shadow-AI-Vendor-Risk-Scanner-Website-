@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Shadow AI Detector",
+  "version": "1.0.0",
+  "description": "Detects employee visits to unapproved AI tool websites and alerts the Shadow AI Risk Scanner dashboard.",
+  "permissions": [
+    "tabs",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Shadow AI Detector",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}

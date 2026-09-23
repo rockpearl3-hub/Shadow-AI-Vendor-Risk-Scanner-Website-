@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   Int        @id @default(autoincrement())
+  email                String     @unique
+  passwordHash         String
+  role                 String     @default("admin") // "admin" | "viewer"
+  isActive             Boolean    @default(true)
+  mfaEnabled           Boolean    @default(false)
+  mfaSecret            String?    // Encrypted TOTP secret
+  mfaBackupCodes       String?    // Encrypted JSON backup codes
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+  tokensInvalidBefore  DateTime?  // Sessions issued before this timestamp are invalid
+  ssoProvider          String?    // "google" | "microsoft"
+  ssoId                String?
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  auditLogs    AuditLog[]
+}
+
+model ApprovedAlternative {
+  id               Int      @id @default(autoincrement())
+  category         String   @unique // matches vendor category (e.g. "AI Tool", "SaaS Vendor", etc.)
+  approvedToolName String
+  approvedToolUrl  String
+  notes            String?  // why approved — e.g. "SOC2 certified, DPA signed"
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  vendors          Vendor[]
+}
+
+model Vendor {
+  id                     Int                  @id @default(autoincrement())
+  name                   String
+  category               String               // "AI Tool" | "SaaS Vendor" | "Cloud Provider" | "Other"
+  dataSensitivity        String               // "Low" | "Medium" | "High"
+  hasCompliance          Boolean              @default(false)
+  hasBreachHistory       Boolean              @default(false)
+  approvedByIT           Boolean              @default(false)
+  riskScore              Int                  @default(0)
+  riskLevel              String               @default("Low") // "Low" | "Medium" | "High"
+  isShadow               Boolean              @default(false)
+  notes                  String?
+  suggestedAlternativeId Int?
+  suggestedAlternative   ApprovedAlternative? @relation(fields: [suggestedAlternativeId], references: [id], onDelete: SetNull)
+  needsReview            Boolean              @default(false)
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+}
+
+model AuditLog {
+  id           Int      @id @default(autoincrement())
+  userId       Int?
+  userEmail    String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action       String   // e.g. "vendor_created", "vendor_approved", "alternative_added", "shadow_detected", "risk_score_changed"
+  entityType   String   // "Vendor" | "ApprovedAlternative" | "User" | "Setting"
+  entityId     Int?
+  details      String?  // JSON string: { old: ..., new: ... }
+  previousHash String?
+  hash         String?
+  timestamp    DateTime @default(now())
+}
+
+model Setting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique // e.g. "retention_days", "sso_google_enabled", "sso_microsoft_enabled"
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
