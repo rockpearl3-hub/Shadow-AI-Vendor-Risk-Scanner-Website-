@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 4000;
 
 // ─── Middleware ──────────────────────────────────────────────────────────────
 app.use(cors({
-  origin: '*',
+  origin: 'https://alert-embrace-production-8c45.up.railway.app',
   credentials: true,
 }));
 app.use(express.json());
